@@ -1,61 +1,21 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
   provider = "sqlite"
-  url      = "file:./dev.db"
+  url      = env("DATABASE_URL")
 }
 
-// ================== ENUMS ==================
-
-enum Role {
-  EMPLOYEE
-  DEPARTMENT_HEAD
-  ASSET_MANAGER
-  ADMIN
-}
-
-enum AssetStatus {
-  AVAILABLE
-  ALLOCATED
-  RESERVED
-  UNDER_MAINTENANCE
-  LOST
-  RETIRED
-  DISPOSED
-}
-
-enum TransferStatus {
-  REQUESTED
-  APPROVED
-  REJECTED
-  COMPLETED
-}
-
-enum BookingStatus {
-  UPCOMING
-  ONGOING
-  COMPLETED
-  CANCELLED
-}
-
-enum MaintenanceStatus {
-  PENDING
-  APPROVED
-  REJECTED
-  TECHNICIAN_ASSIGNED
-  IN_PROGRESS
-  RESOLVED
-}
-
-enum AuditItemResult {
-  PENDING
-  VERIFIED
-  MISSING
-  DAMAGED
-}
+// ================== NOTE ==================
+// SQLite does not support native Prisma enums, so all enum-like fields
+// below use String. Valid values are enforced in the API route code:
+// Role: EMPLOYEE | DEPARTMENT_HEAD | ASSET_MANAGER | ADMIN
+// AssetStatus: AVAILABLE | ALLOCATED | RESERVED | UNDER_MAINTENANCE | LOST | RETIRED | DISPOSED
+// TransferStatus: REQUESTED | APPROVED | REJECTED | COMPLETED
+// BookingStatus: UPCOMING | ONGOING | COMPLETED | CANCELLED
+// MaintenanceStatus: PENDING | APPROVED | REJECTED | TECHNICIAN_ASSIGNED | IN_PROGRESS | RESOLVED
+// AuditItemResult: PENDING | VERIFIED | MISSING | DAMAGED
 
 // ================== CORE ENTITIES ==================
 
@@ -86,7 +46,7 @@ model Employee {
   name           String
   email          String       @unique
   password       String // hashed
-  role           Role         @default(EMPLOYEE)
+  role           String       @default("EMPLOYEE")
   status         String       @default("ACTIVE") // ACTIVE | INACTIVE
   departmentId   String?
   department     Department?  @relation("EmployeeDepartment", fields: [departmentId], references: [id])
@@ -113,7 +73,7 @@ model Asset {
   location         String?
   photoUrl         String?
   isBookable       Boolean     @default(false)
-  status           AssetStatus @default(AVAILABLE)
+  status           String      @default("AVAILABLE")
   allocations      Allocation[]
   bookings         Booking[]
   maintenanceReqs  MaintenanceRequest[]
@@ -139,40 +99,40 @@ model Allocation {
 }
 
 model Transfer {
-  id             String         @id @default(cuid())
+  id             String     @id @default(cuid())
   allocationId   String
-  allocation     Allocation     @relation(fields: [allocationId], references: [id])
+  allocation     Allocation @relation(fields: [allocationId], references: [id])
   requestedById  String
   toEmployeeId   String?
-  status         TransferStatus @default(REQUESTED)
-  createdAt      DateTime       @default(now())
+  status         String     @default("REQUESTED")
+  createdAt      DateTime   @default(now())
   resolvedAt     DateTime?
 }
 
 model Booking {
-  id          String        @id @default(cuid())
+  id          String   @id @default(cuid())
   assetId     String
-  asset       Asset         @relation(fields: [assetId], references: [id])
+  asset       Asset    @relation(fields: [assetId], references: [id])
   employeeId  String
-  employee    Employee      @relation(fields: [employeeId], references: [id])
+  employee    Employee @relation(fields: [employeeId], references: [id])
   startTime   DateTime
   endTime     DateTime
-  status      BookingStatus @default(UPCOMING)
-  createdAt   DateTime      @default(now())
+  status      String   @default("UPCOMING")
+  createdAt   DateTime @default(now())
 }
 
 model MaintenanceRequest {
-  id            String             @id @default(cuid())
+  id            String    @id @default(cuid())
   assetId       String
-  asset         Asset              @relation(fields: [assetId], references: [id])
+  asset         Asset     @relation(fields: [assetId], references: [id])
   requesterId   String
-  requester     Employee           @relation("Requester", fields: [requesterId], references: [id])
+  requester     Employee  @relation("Requester", fields: [requesterId], references: [id])
   issue         String
-  priority      String             @default("MEDIUM") // LOW | MEDIUM | HIGH
+  priority      String    @default("MEDIUM") // LOW | MEDIUM | HIGH
   photoUrl      String?
-  status        MaintenanceStatus  @default(PENDING)
+  status        String    @default("PENDING")
   technician    String?
-  createdAt     DateTime           @default(now())
+  createdAt     DateTime  @default(now())
   resolvedAt    DateTime?
 }
 
@@ -190,16 +150,16 @@ model AuditCycle {
 }
 
 model AuditItem {
-  id           String           @id @default(cuid())
+  id           String     @id @default(cuid())
   auditCycleId String
-  auditCycle   AuditCycle       @relation(fields: [auditCycleId], references: [id])
+  auditCycle   AuditCycle @relation(fields: [auditCycleId], references: [id])
   assetId      String
-  asset        Asset            @relation(fields: [assetId], references: [id])
+  asset        Asset      @relation(fields: [assetId], references: [id])
   auditorId    String?
-  auditor      Employee?        @relation(fields: [auditorId], references: [id])
-  result       AuditItemResult  @default(PENDING)
+  auditor      Employee?  @relation(fields: [auditorId], references: [id])
+  result       String     @default("PENDING")
   notes        String?
-  createdAt    DateTime         @default(now())
+  createdAt    DateTime   @default(now())
 }
 
 model Notification {
