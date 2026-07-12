@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+:root {
+  --graphite: #1C1F22;
+  --slate: #2A2E33;
+  --slate-light: #363B42;
+  --amber: #E8A33D;
+  --amber-dim: #4a3a1e;
+  --success: #4C9A6A;
+  --danger: #D9534F;
+  --info: #5B8FB9;
+  --text: #EDEAE3;
+  --text-dim: #9A9D9F;
+  --border: #3A3F45;
+}
+
+body {
+  background: var(--graphite);
+  color: var(--text);
+  font-family: var(--font-inter), system-ui, sans-serif;
+}
+
+.font-display {
+  font-family: var(--font-space-grotesk), sans-serif;
+}
+
+.font-mono-tag {
+  font-family: var(--font-jetbrains), monospace;
+  letter-spacing: 0.02em;
+}
+
+/* Status stripe utility - the signature "asset tag" look */
+.tag-stripe-available { border-left: 3px solid var(--success); }
+.tag-stripe-allocated { border-left: 3px solid var(--info); }
+.tag-stripe-reserved { border-left: 3px solid var(--amber); }
+.tag-stripe-maintenance { border-left: 3px solid #C77D2E; }
+.tag-stripe-lost { border-left: 3px solid var(--danger); }
+.tag-stripe-retired { border-left: 3px solid var(--text-dim); }
+.tag-stripe-disposed { border-left: 3px solid var(--text-dim); }
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--graphite); }
+::-webkit-scrollbar-thumb { background: var(--slate-light); border-radius: 4px; }

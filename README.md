@@ -1,1 +1,1 @@
-# odoo-hackathon-logicloom
+# Odoo Hackathon - LogicLoom
